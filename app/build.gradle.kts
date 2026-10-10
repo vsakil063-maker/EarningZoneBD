@@ -19,7 +19,8 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        // Kotlin 1.9.22 এর জন্য সঠিক ভার্সন 1.5.9
+        kotlinCompilerExtensionVersion = "1.5.9" 
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
