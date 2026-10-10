@@ -18,15 +18,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.5'
 
-      - name: Prepare Android Project
+      - name: Prepare Project
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           if [ ! -f "gradlew" ]; then
@@ -39,6 +36,7 @@ jobs:
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: EarningZoneBDT-APK
           path: app/build/outputs/apk/debug/*.apk
