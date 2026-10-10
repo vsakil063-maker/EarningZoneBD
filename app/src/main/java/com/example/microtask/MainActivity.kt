@@ -13,8 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-// --- Colors from your CSS ---
 val BgDark = Color(0xFF020713)
 val CardDark = Color(0xFF061324)
 val LimeColor = Color(0xFFD8FF38)
@@ -55,23 +53,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MicroTaskApp() {
-    var isLoggedIn by remember { mutableStateOf(false) }
+    val isLoggedIn = remember { mutableStateOf(false) }
 
-    if (!isLoggedIn) {
-        AuthScreen(onLoginSuccess = { isLoggedIn = true })
+    if (!isLoggedIn.value) {
+        AuthScreen(onLoginSuccess = { isLoggedIn.value = true })
     } else {
         MainDashboard()
     }
 }
 
-// ================= ১. ইনভেজো লগইন / রেজিস্ট্রেশন স্ক্রিন (Bottom Sheet সহ) =================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(onLoginSuccess: () -> Unit) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var isLoginView by remember { mutableStateOf(true) }
+    val showBottomSheet = remember { mutableStateOf(false) }
+    val isLoginView = remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFFF8F8F7)).padding(24.dp),
@@ -86,7 +83,7 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
         Spacer(modifier = Modifier.height(60.dp))
 
         Button(
-            onClick = { isLoginView = false; showBottomSheet = true },
+            onClick = { isLoginView.value = false; showBottomSheet.value = true },
             colors = ButtonDefaults.buttonColors(containerColor = LimeColor),
             shape = RoundedCornerShape(50),
             modifier = Modifier.fillMaxWidth().height(52.dp)
@@ -95,7 +92,7 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
         }
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedButton(
-            onClick = { isLoginView = true; showBottomSheet = true },
+            onClick = { isLoginView.value = true; showBottomSheet.value = true },
             shape = RoundedCornerShape(50),
             modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {
@@ -103,15 +100,15 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
         }
     }
 
-    if (showBottomSheet) {
+    if (showBottomSheet.value) {
         ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
+            onDismissRequest = { showBottomSheet.value = false },
             sheetState = sheetState,
             containerColor = Color(0xFFF8F8F7)
         ) {
             Column(modifier = Modifier.padding(24.dp).padding(bottom = 30.dp)) {
-                Text(if (isLoginView) "Welcome back" else "Create your account", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                Text(if (isLoginView) "Sign in to continue" else "Enter your details to get started", fontSize = 14.sp, color = Color.Gray)
+                Text(if (isLoginView.value) "Welcome back" else "Create your account", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(if (isLoginView.value) "Sign in to continue" else "Enter your details to get started", fontSize = 14.sp, color = Color.Gray)
                 Spacer(modifier = Modifier.height(20.dp))
 
                 OutlinedTextField(
@@ -130,33 +127,30 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showBottomSheet = false
-                                onLoginSuccess()
-                            }
+                        scope.launch {
+                            sheetState.hide()
+                            showBottomSheet.value = false
+                            onLoginSuccess()
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LimeColor),
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 ) {
-                    Text(if (isLoginView) "Sign In" else "Create Account", color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text(if (isLoginView.value) "Sign In" else "Create Account", color = Color.Black, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
 
-// ================= ২. মেইন ড্যাশবোর্ড (HTML এর মতো কালার ও ডিজাইন) =================
 @Composable
 fun MainDashboard() {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(bottom = 80.dp) // Bottom nav space
+            modifier = Modifier.fillMaxSize().padding(bottom = 80.dp)
         ) {
             item {
-                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -182,13 +176,9 @@ fun MainDashboard() {
                 }
             }
 
-            item {
-                // Balance Card
-                BalanceCard()
-            }
+            item { BalanceCard() }
 
             item {
-                // Deposit & Withdraw Action Buttons
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ActionButton("Deposit", "Add Money", DepositGradient, Icons.Default.ArrowDownward, Modifier.weight(1f))
                     ActionButton("Withdraw", "Cash Out", WithdrawGradient, Icons.Default.ArrowUpward, Modifier.weight(1f))
@@ -196,7 +186,6 @@ fun MainDashboard() {
             }
 
             item {
-                // Tasks
                 Column(modifier = Modifier.padding(16.dp)) {
                     TaskCard("Watch Videos & Earn", "Watch videos from popular platforms", Icons.Default.PlayArrow, Color(0xFF00D2FF))
                     Spacer(modifier = Modifier.height(10.dp))
@@ -207,14 +196,13 @@ fun MainDashboard() {
             }
         }
 
-        // Custom Floating Bottom Navigation (HTML এর ডিজাইনের মতো)
         CustomBottomNav(modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 
 @Composable
 fun BalanceCard() {
-    var isHidden by remember { mutableStateOf(false) }
+    val isHidden = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Box(
@@ -231,10 +219,10 @@ fun BalanceCard() {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("My Balance", color = Color(0xFFD8ECFF), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.width(6.dp))
-                            Icon(if (isHidden) Icons.Default.Lock else Icons.Default.Visibility, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp).clickable { isHidden = !isHidden })
+                            Icon(if (isHidden.value) Icons.Default.Lock else Icons.Default.Visibility, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp).clickable { isHidden.value = !isHidden.value })
                         }
-                        Text(if (isHidden) "$ ••••" else "$ 12.45", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                        Text(if (isHidden) "≈ •••• BDT" else "≈ 1,240.00 BDT", fontSize = 11.sp, color = Color(0xFFD6E2F5))
+                        Text(if (isHidden.value) "$ ••••" else "$ 12.45", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                        Text(if (isHidden.value) "≈ •••• BDT" else "≈ 1,240.00 BDT", fontSize = 11.sp, color = Color(0xFFD6E2F5))
                     }
                 }
                 Column(horizontalAlignment = Alignment.End) {
@@ -247,7 +235,6 @@ fun BalanceCard() {
                 }
             }
             
-            // Sub Stats (Today Earn, Total Earn)
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF061124)).padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 SubStat("Today", "$ 2.35", Color(0xFF00D25B))
@@ -320,7 +307,6 @@ fun CustomBottomNav(modifier: Modifier) {
             NavItem("Home", Icons.Outlined.Home, Color(0xFF00D2FF))
             NavItem("Tasks", Icons.Default.List, MutedText)
             
-            // Center Floating Button
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.offset(y = (-15).dp)) {
                 Box(modifier = Modifier.size(54.dp).clip(CircleShape).background(CenterBubbleGradient).border(3.dp, Color(0xFF030A16), CircleShape), contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.SupportAgent, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
